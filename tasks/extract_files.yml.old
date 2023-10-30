@@ -1,0 +1,65 @@
+---
+
+- name: Create Patch directory
+  file:
+    path: "{{ patch_directory }}"
+    state: directory
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+
+- debug: var=quarterly_patches[patch_id].filename
+
+- name: Copy quarterly patch from S3
+  aws_s3:
+    bucket: "{{ s3_install_bucket }}"
+    object: "{{ quarterly_patches[patch_id].filename }}"
+    dest: "{{ patch_directory}}/{{ quarterly_patches[patch_id].filename }}"
+    mode: get
+    overwrite: never
+
+- name: Unzip Quarterly Patch
+  unarchive:
+    src: "{{ patch_directory }}/{{ quarterly_patches[patch_id].filename }}"
+    dest: "{{ patch_directory}}/"
+    copy: no
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+  when: not ansible_check_mode
+
+- name: Copy OPatch
+  aws_s3:
+    bucket: "{{ s3_install_bucket }}"
+    object: "{{ opatch[oracle_version].filename }}"
+    dest: "{{ oracle_stage_install }}/{{ opatch[oracle_version].filename }}"
+    mode: get
+    overwrite: always
+
+- name: Copy ocm response file
+  aws_s3:
+    bucket: "{{ s3_install_bucket }}"
+    object: ocm.rsp
+    dest: "{{ patch_directory}}/ocm.rsp"
+    mode: get
+    overwrite: never
+  when: oracle_version == '11.2.0.4'
+
+- name: Copy oneoff patches from S3
+  aws_s3:
+    bucket: "{{ s3_install_bucket }}"
+    object: "{{ item.filename }}"
+    dest: "{{ patch_directory}}/{{ item.filename }}"
+    mode: get
+    overwrite: never
+  with_items: "{{ patch_level[oracle_version].oneoff_patches | default([]) }}"
+  when: patch_level[oracle_version].oneoff_patches is defined and not ansible_check_mode
+
+- name: Unzip oneoff patches
+  unarchive:
+    src: "{{ patch_directory }}/{{ item.filename }}"
+    dest: "{{ patch_directory }}/"
+    copy: no
+    creates: "{{ patch_directory }}/{{ item.patch_id }}/README.txt"
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+  with_items: "{{ patch_level[oracle_version].oneoff_patches | default([]) }}"
+  when: patch_level[oracle_version].oneoff_patches is defined and not ansible_check_mode

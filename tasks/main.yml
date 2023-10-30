@@ -1,0 +1,40 @@
+---
+#role: psu-apply
+#file: main.yml
+
+- debug: var=patch_type
+
+- name: Run pre-check tasks
+  include: pre_checks.yml
+  tags: pre_checks
+
+- name: Extract PSU and One-off patches
+  include: extract_files.yml
+  when: not rollback_psu
+  tags: extract_files
+
+- name: Update opatch
+  include: update_opatch.yml
+  tags: update_opatch
+
+
+- name: Apply Quarterly Patch
+  include: "{{ patch_type }}_{{ oracle_install_type }}.yml"
+  become_user: "{{ oracle_user }}"
+  when: not rollback_psu
+  tags: apply
+
+- name: Rollback Quarterly Patch
+  include: "rollback_{{ oracle_install_type }}.yml"
+  become_user: "{{ oracle_user }}"
+  when: rollback_psu
+  tags: rollback
+
+- name: Opatch lsinventory
+  shell: "{{ oracle_home }}/OPatch/opatch lsinventory -oh {{ oracle_home }}"
+  become_user: "{{ oracle_user }}"
+  with_items:
+  - "{{ oracle_home }}"
+  - "{{ grid_home|default(None) }}"
+  when: item is defined
+  register: lsinv_post

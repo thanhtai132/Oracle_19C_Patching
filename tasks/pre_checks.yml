@@ -1,0 +1,27 @@
+---
+- name: fail if required variables are not defined
+  fail: msg="{{ item }} is not defined for {{ ansible_hostname }}"
+  when: "{{ item }} is not defined"
+  tags: always
+  with_items:
+    - oracle_install_type
+    - oracle_version
+    - patch_type
+    - patch_name
+
+      ##- name: Check for zip file
+      ##stat:
+      ##path: "{{ oracle_stage_install }}"
+      ##get_checksum: false
+      ##get_md5: false
+      ##register: patch_st
+
+      ##- debug: var=patch_st.stdout_lines
+
+  ##  failed_when: "not {{ patch_st.stat.exists }}"
+
+      ##- name: Check if OPatch zip file exists
+      ##stat:
+      ##path: "{{ oracle_stage_install }}"
+      ##register: opatch_st
+      ##failed_when: "not {{ opatch_st.stat.exists }}"

@@ -1,0 +1,24 @@
+---
+#Apply PSU one-off patches
+- name: Template patch list
+  template:
+    src: patch_list.j2
+    dest: "{{ oracle_stage_base }}/patch_list_{{ oracle_version }}_{{ patch_name }}.txt"
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+
+- name: Opatch prereq check for oneoff patches
+  shell: opatch prereq CheckConflictAgainstOHWithDetail -phBaseFile {{ oracle_stage_base }}/patch_list_{{ oracle_version }}_{{ patch_name }}.txt
+  environment: "{{ env }}"
+  become_user: "{{ oracle_user }}"
+  register: oneoff_conflicts_psu
+
+- debug: var=oneoff_conflicts_psu.results
+
+- name: Apply one-off patches
+  shell: opatch napply -silent -skip_subset -skip_duplicate -ocmrf {{ oracle_stage_install }}/ocm.rsp -phBaseFile {{ oracle_stage_base }}/patch_list_{{ oracle_version }}_{{ patch_name }}.txt
+  environment: "{{ env }}"
+  become_user: "{{ oracle_user }}"
+  register: oneoff_apply_psu
+
+- debug: var=oneoff_apply_psu.results

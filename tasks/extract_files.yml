@@ -1,0 +1,21 @@
+---
+
+- name: Create Patch directory
+  file:
+    path: "{{ patch_directory }}"
+    state: directory
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+
+- debug: var=quarterly_patches[patch_type][oracle_version][patch_name].filename
+
+- name: Unzip Quarterly Patch
+  unarchive:
+    src: "{{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].filename }}"
+    dest: "{{ patch_directory}}/"
+    copy: no
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+  when: not ansible_check_mode
+
+

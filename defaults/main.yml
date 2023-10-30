@@ -1,0 +1,24 @@
+patch_name: OCT2023 # Should match psu dictionary variable defined in vars/main.yml
+
+shutdown_listener: true # set to false if patching an empty oracle home (ie new 12c install)
+rollback_psu: false # set to true if rolling back current PSU.
+
+oracle_home: "/u01/app/oracle/product/19.0.0/dbhome_1"
+oracle_base: /u01/app/oracle
+tns_admin: "{{ oracle_home }}/network/admin"
+
+oracle_stage_install: /u01
+oracle_stage_base: /u01
+oracle_install_type: si
+oracle_version: 19.3.0.0
+patch_type: RU
+patch_directory: /u01
+
+env:
+ORACLE_HOME: "{{ oracle_home }}"
+ORACLE_BASE: "{{ oracle_base }}"
+TNS_ADMIN: "{{ tns_admin }}"
+PATH: "{{ oracle_home }}/bin:{{ oracle_home }}/OPatch:$PATH:/bin:/usr/bin::/usr/ccs/bin"
+
+oracle_user: oracle # User that will own the Oracle Installations.
+oracle_group: oinstall # Primary group for oracle_user.

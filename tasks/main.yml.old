@@ -1,0 +1,40 @@
+---
+  #role: ansible-oracle-psu
+
+- debug: var=patch_type
+
+- debug: var=patch_id
+
+- name: Extract PSU and One-off patches
+  include: extract_files.yml
+  tags: extract_files
+
+- name: Update opatch
+  include: update_opatch.yml
+  tags: update_opatch
+
+
+# - name: Stop EM Agent
+#   shell: "{{ agent_home }}/bin/emctl stop agent"
+#   become_user: "{{ oracle_user }}"
+#   when: agent_home is defined and shutdown_listener
+#   tags: stop_agent
+
+- name: Apply Quarterly Patches
+  include: apply_quarterly_patches.yml
+  become_user: "{{ oracle_user }}"
+  when: not rollback_psu
+  tags: apply
+
+# - name: Rollback Quarterly Patch
+#   include: "rollback_{{ oracle_install_type }}.yml"
+#   become_user: "{{ oracle_user }}"
+#   when: rollback_psu
+#   tags: rollback
+
+# - name: Start EM Agent
+#   shell: "{{ agent_home }}/bin/emctl start agent"
+#   become: yes
+#   become_user: "{{ oracle_user }}"
+#   when: agent_home is defined and shutdown_listener
+#   tags: start_agent
