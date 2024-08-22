@@ -3,10 +3,10 @@ name: Ansible files & Deployment
 on:
   push:
     paths:
-      - 'playbooks/**'
+      - 'tasks/**'
   pull_request:
     paths:
-      - 'playbooks/**'
+      - 'tasks/**'
 
 jobs:
   ansible-lint:
