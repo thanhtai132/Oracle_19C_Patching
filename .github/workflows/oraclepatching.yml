@@ -1,15 +1,14 @@
-name: Ansible files & Deployment 
+name: Oracle 19C Patching
 
 on:
   push:
-    paths:
-      - 'tasks/**'
-  pull_request:
-    paths:
-      - 'tasks/**'
-
+    branches:
+      - master
+    
 jobs:
-  ansible-lint:
-    uses: ansible/ansible-content-actions/.github/workflows/ansible_lint.yaml@main
-    with:
-      args: '-p playbooks'
+  run-playbooks:
+    runs-on: self-hosted
+  steps:
+  - uses: actions/checkout@v2
+  - name: Run Ansible Playbook
+    run: ansible-playbook ../../patch.yml
