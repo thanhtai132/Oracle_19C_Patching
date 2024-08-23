@@ -10,7 +10,7 @@ tns_admin: "{{ oracle_home }}/network/admin"
 oracle_stage_install: /u01
 oracle_stage_base: /u01
 oracle_install_type: si
-4oracle_version: 19.23.0.0
+4oracle_version: 19.24.0.0
 patch_type: RU
 patch_directory: /u01
 
